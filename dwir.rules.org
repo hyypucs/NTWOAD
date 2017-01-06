@@ -1,0 +1,109 @@
+##########################################################################
+#
+# DreamWiz Library Rule File
+#
+#                       by hyypucs
+# init : 2007. 11. 01.
+# update : 2007. 11. 06.
+#
+##########################################################################
+
+# OS설정
+# OS에 따라서 라이브러리 이름이 변경됨
+OS = freebsd
+# debug모드냐 release 모드냐..
+CODE_GEN = debug
+
+ifeq ($(OS),linux)
+DEF_OS = -D_LINUX
+endif
+ifeq ($(OS),solaris)
+DEF_OS = -D_SOLARIS
+endif
+ifeq ($(OS),freebsd)
+DEF_OS = -D_FREEBSD
+endif
+
+# library 디렉토리
+DWIR_ROOT	= /dream/home/yyhur/search/dwirlib
+
+DWIR_LIB	= $(DWIR_ROOT)/lib
+DWIR_SRC	= $(DWIR_ROOT)/src
+DWIR_SAMPLE	= $(DWIR_ROOT)/sample
+
+# library include 및 library link를 위해서 세팅함
+DWIR_INC	= -I$(DWIR_ROOT)/src
+UTIL_LIB	= -L$(DWIR_LIB) -lutil_$(OS)
+UTIL_TH_LIB	= -L$(DWIR_LIB) -lutil_th_$(OS)
+UTIL_HANENG_LIB	= -L$(DWIR_LIB) -lutil_haneng_$(OS)
+CGIDW_LIB	= -L$(DWIR_LIB) -lcgidw_$(OS)
+INDEX_LIB	= -L$(DWIR_LIB) -lindex_$(OS)
+BDB_STORE_LIB   = -L$(DWIR_LIB) -lbdb_store_$(OS)
+
+# 형태소 분석기 library 세팅
+SCAN_DIR	= $(DWIR_ROOT)/scan
+SCAN_INC	= -I$(SCAN_DIR)
+SCAN_LIB	= -L$(DWIR_LIB) -lscan_$(OS) -L$(DWIR_LIB) -lstag_$(OS)
+
+# cgi library 세팅
+CGI_DIR		= $(DWIR_ROOT)/cgilib
+CGI_INC		= -I$(CGI_DIR)
+CGI_LIB		= -L$(DWIR_LIB) -lcgi_$(OS)
+
+
+# 버클리 DB 세팅 - 새로 만든 storage를 버클리 DB를 이용해서 저장해 보았음 
+# sample code테스트 하려면 있어야 합니다.
+BERKELEYDB	= /usr/local/BerkeleyDB.4.5
+BERKELEYDB_INC 	= -I$(BERKELEYDB)/include
+BERKELEYDB_LIB 	= -L$(BERKELEYDB)/lib -ldb
+
+ifeq ($(CODE_GEN),release)
+# release
+COMMON_CFLAG	= -Wall -O
+COMMON_DFLAG	= -D_DW_LITTLE_ENDIAN -D_UNIX $(DEF_OS)
+else
+# debug
+COMMON_CFLAG	= -Wall -ggdb
+COMMON_DFLAG	= -D_DEBUG -D_DW_LITTLE_ENDIAN -D_UNIX $(DEF_OS)
+endif
+
+# pthread use
+PTHREAD_DFLAG	= -D_MTHREAD -D_POSIX_PTHREAD_SEMANTICS -D_REENTRANT
+PTHREAD_INC	=  
+PTHREAD_LIB	= -lpthread -lrt
+
+ifeq ($(OS),freebsd)
+#freebsd
+SYSTEM_LIB	= -lm
+S_DIR		= /bin
+S_UDIR		= /usr/bin
+endif
+ifeq ($(OS),linux)
+#linux
+SYSTEM_LIB	= -lm
+S_DIR		= /bin
+S_UDIR		= /usr/bin
+endif
+ifeq ($(OS),solaris)
+#solaris
+SYSTEM_LIB	= -lsocket -lnsl -lm
+S_DIR		= /usr/bin
+S_UDIR		= /usr/ccs/bin
+endif
+
+CC		= gcc
+CXX		= g++
+CP		= $(S_DIR)/cp
+RM		= $(S_DIR)/rm
+AR		= $(S_UDIR)/ar
+
+ifeq ($(CODE_GEN),release)
+# release
+RANLIB		= $(S_UDIR)/ranlib
+STRIP		= $(S_UDIR)/strip
+else
+# debug
+RANLIB		= echo
+STRIP		= echo
+endif
+
